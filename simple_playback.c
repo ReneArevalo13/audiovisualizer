@@ -7,14 +7,17 @@
 #include "miniaudio.c"
 #include <stdio.h>
 
-void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
-                  ma_uint32 frameCount) {
+void data_callback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uint32 frameCount) {
+    //printf("Invoking data callback\n");
+    ma_uint64 framesRead;
     ma_decoder *pDecoder = (ma_decoder*)pDevice->pUserData;
     if (pDecoder == NULL) {
         return ;
     }
 
-    ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, NULL);
+    ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, &framesRead);
+    printf("%p\t", &pOutput);
+       // printf("Framecount: %u/n", frameCount);
     (void)pInput;
 }
 
@@ -47,14 +50,17 @@ int main(int argc, char** argv) {
         ma_decoder_uninit(&decoder);
         return -3;
     } 
+    printf("Starting Device\n");
     if (ma_device_start(&device) != MA_SUCCESS) {
         printf("Failed to start playback device.\n");
         ma_decoder_uninit(&decoder);
         return -4;
     }
+
+    printf("LETS PARTY\n");
     printf("Press Enter to quit ...");
     getchar();
-
+    printf("Quitting program\n");
     ma_device_uninit(&device);
     ma_decoder_uninit(&decoder);
     return 0; 
