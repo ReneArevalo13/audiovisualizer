@@ -16,9 +16,9 @@ void data_callback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uin
     }
 
     ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, &framesRead);
-    printf("%p\t", &pOutput);
+    printf("%d\t", &pOutput);
        // printf("Framecount: %u/n", frameCount);
-    (void)pInput;
+   // (void)pInput;
 }
 
 int main(int argc, char** argv) {
