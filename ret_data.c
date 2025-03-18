@@ -19,6 +19,8 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
     ma_uint64 channels       = pDecoder->outputChannels;
     ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, &framesRead);
     memcpy(pData, pOutput,bytesPerSample*sizeof(format)*channels);
+    float frame = *(float*)pData;
+    printf("%f", frame);
 }
 
 
@@ -35,7 +37,7 @@ int main (int argc, char** argv) {
     ma_uint64 channels;
     ma_uint32 bytesPerSample;
     ma_format format;
-    void* pData;
+  //  void* pData;
 
     
     if (argc < 2) {
