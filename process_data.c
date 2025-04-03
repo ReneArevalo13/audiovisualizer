@@ -39,7 +39,7 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
 
 
     // copying data
-    memcpy(global_frames+count, pOutput, sizeof(format)*frameCount);
+    memcpy(global_frames, pOutput, sizeof(format)*frameCount);
     count = (size_t)frameCount;
 }
 
@@ -58,12 +58,7 @@ int main (int argc, char** argv) {
     ma_uint32 bytesPerSample;
     ma_format format;
 
-    // RAYLIB STUFF
-    const int screenWidth = 800;
-    const int screenHeight = 800;
-    const int N = 600;
-    const int hh = screenHeight/2;  // half height
-
+    
     
     if (argc < 2) {
         printf("No input file");
@@ -100,33 +95,40 @@ int main (int argc, char** argv) {
         ma_decoder_uninit(&decoder);
         return -5;
     }
+    // RAYLIB STUFF
+    const int screenWidth = 800;
+    const int screenHeight = 800;
+    const int N = 800;
+    const int hh = screenHeight/2;  // half height
 
     // Plot the data
     InitWindow(screenWidth, screenHeight, "PCM DATA");
     SetTargetFPS(60);
 
-
-    printf("Press Enter to quit...");
     while(!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
         float cell_width = (float)screenWidth/N;
-        //float cell_width = 1;
-        for (int i=0; i<3000; i++) {
+        for (int i=0; i<count; i++) {
+
             float sample = *(float*)&global_frames[i];
-            if (sample > 0) {
-                float s_height = hh*sample;  // scaled height
-                DrawRectangle(i*cell_width, hh-s_height, cell_width, s_height, GREEN);
+            printf("outside:%d\t, sample: %f\n", i, sample);
+            if (sample >= 0) {
+               float s_height = hh*sample;  // scaled height
+            //    printf("int i %d\n",i);
+              //  printf("float i %f\n",(float)i);
+               // printf("POSITION X: %f\n", i*cell_width);
+                DrawRectangle(220+i*cell_width, hh-s_height, cell_width, s_height, VIOLET);
             } else {
-               // float s_height = -1.0*hh*sample;  // scaled height
-               // DrawRectangle(i*cell_width ,hh, cell_width, s_height, RED);
+                 float s_height = -1.0*hh*sample;  // scaled height
+                DrawRectangle(220+i*cell_width, hh, cell_width, s_height, SKYBLUE);
             }
        }
         EndDrawing();
     }
     CloseWindow();
 
-    getchar();
+   // getchar();
     ma_decoder_uninit(&decoder);
     ma_device_uninit(&device);
     printf("FILE END\n");
