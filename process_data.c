@@ -60,8 +60,8 @@ int main (int argc, char** argv) {
 
     // RAYLIB STUFF
     const int screenWidth = 800;
-    const int screenHeight = 500;
-    const int N = 500;
+    const int screenHeight = 800;
+    const int N = 600;
     const int hh = screenHeight/2;  // half height
 
     
@@ -101,32 +101,25 @@ int main (int argc, char** argv) {
         return -5;
     }
 
-    // output the global_frames data
-    
-
-    
-
-    
     // Plot the data
     InitWindow(screenWidth, screenHeight, "PCM DATA");
     SetTargetFPS(60);
-    srand(time(NULL));
 
-    // random rects
 
     printf("Press Enter to quit...");
     while(!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
         float cell_width = (float)screenWidth/N;
-        for (int i=0; i<N; i++) {
+        //float cell_width = 1;
+        for (int i=0; i<3000; i++) {
             float sample = *(float*)&global_frames[i];
             if (sample > 0) {
                 float s_height = hh*sample;  // scaled height
                 DrawRectangle(i*cell_width, hh-s_height, cell_width, s_height, GREEN);
             } else {
-                float s_height = -1.0*hh*sample;  // scaled height
-                DrawRectangle(i*cell_width,0 , cell_width, s_height, GREEN);
+               // float s_height = -1.0*hh*sample;  // scaled height
+               // DrawRectangle(i*cell_width ,hh, cell_width, s_height, RED);
             }
        }
         EndDrawing();
