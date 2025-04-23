@@ -11,28 +11,27 @@
 #include <math.h>
 
 #define PI 3.14159265358979323846
-#define NUM_SAMPLES 8          // number of gathered samples
-#define NUM_SAMPLES_M_1 7      // number of samples -1
-#define LOG2_NUM_SAMPLES 3     // log2 of samples gathered
-#define SHIFT_AMOUNT 13        // length of short mine log2 of samples
+#define NUM_SAMPLES 4          // number of gathered samples
+#define NUM_SAMPLES_M_1 3      // number of samples -1
+#define LOG2_NUM_SAMPLES 2     // log2 of samples gathered
+#define SHIFT_AMOUNT 14        // length of short mine log2 of samples
 
-float fr[NUM_SAMPLES] = {1, 2, 3, 4, 5, 6, 7, 8};   // real part of the samples
+float fr[NUM_SAMPLES] = {1, 2, 3, 4};   // real part of the samples
+float fi[NUM_SAMPLES] = {0.0};   // real part of the samples
 float Sinewave[NUM_SAMPLES];
-
-
 
 void FFT_float(float fr[]) {
     unsigned short m;         // index to be swapped
     unsigned short mr;        // the other index being swapped (reverse)
-    float tr;                 // temp storage
+    float tr, ti;                 // temp storage
 
     int i, j;     // indices being combined in the Danielson-Lanczos part  of the algorithm
     int L;        // length of FFT being combined
     int k;        // used for looking up trig values from sine table
     int istep;    // length of FFT, comes from combining two FFTs
 
-    float wr;     // trig value from lookup table
-    float qr;     // temp variable for DL part of alg
+    float wr, wi;     // trig value from lookup table
+    float qr, qi;     // temp variable for DL part of alg
     for (int i=0; i<NUM_SAMPLES; i++) {
             printf("%f  ", fr[i]);
         }
@@ -61,6 +60,9 @@ void FFT_float(float fr[]) {
         tr = fr[m];
         fr[m] = fr[mr];
         fr[mr] = tr;
+        ti = fi[m];
+        fi[m] = fi[mr];
+        fi[mr] = ti;
     }
 
     // DANIELSON_LASCZOS 
@@ -85,21 +87,27 @@ void FFT_float(float fr[]) {
             printf("J: %d\n", j);
             printf("M: %d\n", m);
             wr = Sinewave[j + NUM_SAMPLES/4];     // cos(2pi m/N) 
+            wi = -Sinewave[j];     // cos(2pi m/N) 
           //  printf("USING SIN value %f: \n", wr);
-              wr /= 2;           // divide by 2
+            wr /= 2;           // divide by 2
+            wi /= 2;           // divide by 2
             // i gets the index of one of the FFT elements being combined
             for (i=m; i<NUM_SAMPLES; i+=istep) {
                 // j gets the index of the FFT element being combined with i
                 j = i + L;
                 // compute the trig terms
                 printf("jth element fr[j] = %f\n", fr[j]);
-                tr = wr * fr[j];   // ignoring the imaginary part since it's 0
+                tr = (wr * fr[j]) - (wi * fi[j]);   
+                ti = (wr * fi[j]) + (wi * fr[j]);   
                 // divide the ith index elements by 2
                 printf("ith element fr[i] = %f\n", fr[i]);
                 qr = fr[i]/2;
+                qi = fi[i]/2;
                 // compute the new values at each index
                 fr[j] = qr - tr;
                 fr[i] = qr + tr;
+                fi[j] = qi - ti;
+                fi[i] = qi + ti;
             }
         }
         --k;
