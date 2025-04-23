@@ -11,13 +11,13 @@
 #include <math.h>
 
 #define PI 3.14159265358979323846
-#define NUM_SAMPLES 4          // number of gathered samples
-#define NUM_SAMPLES_M_1 3      // number of samples -1
-#define LOG2_NUM_SAMPLES 2     // log2 of samples gathered
-#define SHIFT_AMOUNT 14        // length of short mine log2 of samples
+#define NUM_SAMPLES 8          // number of gathered samples
+#define NUM_SAMPLES_M_1 7      // number of samples -1
+#define LOG2_NUM_SAMPLES 3     // log2 of samples gathered
+#define SHIFT_AMOUNT 13        // length of short minus log2 of samples
 
-float fr[NUM_SAMPLES] = {1, 2, 3, 4};   // real part of the samples
-float fi[NUM_SAMPLES] = {0.0};   // real part of the samples
+float fr[NUM_SAMPLES] = {1, 25, 35, 4, 54, 62, 72, 8};   // real part of the samples
+float fi[NUM_SAMPLES] = {0.0};   // imaginary part of the samples
 float Sinewave[NUM_SAMPLES];
 
 void FFT_float(float fr[]) {
@@ -32,11 +32,6 @@ void FFT_float(float fr[]) {
 
     float wr, wi;     // trig value from lookup table
     float qr, qi;     // temp variable for DL part of alg
-    for (int i=0; i<NUM_SAMPLES; i++) {
-            printf("%f  ", fr[i]);
-        }
-    printf("\n");
-
 
     /* BIT REVERSAL */
     // code below based on stanford graphics lab
@@ -74,10 +69,7 @@ void FFT_float(float fr[]) {
         while (L < NUM_SAMPLES) {
         // determine the length of the FFT which will result from combining two FFTs
         printf("L: %d\n", L);
-        for (int i=0; i<NUM_SAMPLES; i++) {
-            printf("%f  ", fr[i]);
-        }
-        printf("\n");
+        
         istep = L<<1;             // note that this left bit shift is doubling
         printf("ISTEP %d\n", istep);
         // for each element in the FFT that are being combined...
@@ -88,9 +80,6 @@ void FFT_float(float fr[]) {
             printf("M: %d\n", m);
             wr = Sinewave[j + NUM_SAMPLES/4];     // cos(2pi m/N) 
             wi = -Sinewave[j];     // cos(2pi m/N) 
-          //  printf("USING SIN value %f: \n", wr);
-            wr /= 2;           // divide by 2
-            wi /= 2;           // divide by 2
             // i gets the index of one of the FFT elements being combined
             for (i=m; i<NUM_SAMPLES; i+=istep) {
                 // j gets the index of the FFT element being combined with i
@@ -101,8 +90,8 @@ void FFT_float(float fr[]) {
                 ti = (wr * fi[j]) + (wi * fr[j]);   
                 // divide the ith index elements by 2
                 printf("ith element fr[i] = %f\n", fr[i]);
-                qr = fr[i]/2;
-                qi = fi[i]/2;
+                qr = fr[i];
+                qi = fi[i];
                 // compute the new values at each index
                 fr[j] = qr - tr;
                 fr[i] = qr + tr;
