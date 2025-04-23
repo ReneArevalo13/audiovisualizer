@@ -33,6 +33,11 @@ void FFT_float(float fr[]) {
 
     float wr;     // trig value from lookup table
     float qr;     // temp variable for DL part of alg
+    for (int i=0; i<NUM_SAMPLES; i++) {
+            printf("%f  ", fr[i]);
+        }
+    printf("\n");
+
 
     /* BIT REVERSAL */
     // code below based on stanford graphics lab
@@ -58,28 +63,39 @@ void FFT_float(float fr[]) {
         fr[mr] = tr;
     }
 
-    /* DANIELSON_LASCZOS */
+    // DANIELSON_LASCZOS 
     // Length of FFTs being combined (starts at 1)
     L = 1;
     // LOG2 of the number of samples, minus 1
     k = LOG2_NUM_SAMPLES - 1;
     // while the length of FFTs being combined is less thant the number of samples
-    while (L < NUM_SAMPLES) {
+        while (L < NUM_SAMPLES) {
         // determine the length of the FFT which will result from combining two FFTs
-        istep = L<<1;     // note that this left bit shift is essentially doubling
+        printf("L: %d\n", L);
+        for (int i=0; i<NUM_SAMPLES; i++) {
+            printf("%f  ", fr[i]);
+        }
+        printf("\n");
+        istep = L<<1;             // note that this left bit shift is doubling
+        printf("ISTEP %d\n", istep);
         // for each element in the FFT that are being combined...
-        for (m=0; m<L; m++) {
+        for (m=0; m<L; ++m) {
             // Lookup the trig values for that element
-            j = m << k;      // index of the sine table
-            wr = Sinewave[j + NUM_SAMPLES/4];     // cos(2pi m/N)
-           // wr >>= 1;        // divide by 2
+            j = m << k;            // index of the sine table
+            printf("J: %d\n", j);
+            printf("M: %d\n", m);
+            wr = Sinewave[j + NUM_SAMPLES/4];     // cos(2pi m/N) 
+          //  printf("USING SIN value %f: \n", wr);
+              wr /= 2;           // divide by 2
             // i gets the index of one of the FFT elements being combined
             for (i=m; i<NUM_SAMPLES; i+=istep) {
                 // j gets the index of the FFT element being combined with i
                 j = i + L;
                 // compute the trig terms
+                printf("jth element fr[j] = %f\n", fr[j]);
                 tr = wr * fr[j];   // ignoring the imaginary part since it's 0
                 // divide the ith index elements by 2
+                printf("ith element fr[i] = %f\n", fr[i]);
                 qr = fr[i]/2;
                 // compute the new values at each index
                 fr[j] = qr - tr;
@@ -88,18 +104,21 @@ void FFT_float(float fr[]) {
         }
         --k;
         L = istep;
+        printf("NEXT TRANSFORM \n\n");
     }
+    
 }
 
 
 int main() {
     for (int i=0; i<NUM_SAMPLES; i++) {
-        Sinewave[i] = sin(2 * PI * (float)i / NUM_SAMPLES);
+        Sinewave[i] = sin((2*PI) * ((float)i / NUM_SAMPLES)) ;
+       // printf("SINwave[%d]: %f\n", i, Sinewave[i]);
     }
     FFT_float(fr);
     int size = sizeof(fr)/sizeof(fr[0]);
     for (int i=0; i<size; i++) {
-        printf(" %f\n", fr[i]);
+       printf(" %f\n", fr[i]);
     }
     return 0;
 }
