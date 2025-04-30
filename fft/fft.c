@@ -16,11 +16,17 @@
 #define LOG2_NUM_SAMPLES 9      // log2 of samples gathered
 #define SHIFT_AMOUNT 7          // length of short (16) minus log2 of samples
 
-//float fr[NUM_SAMPLES] = {};   // real part of the samples
+float fr[NUM_SAMPLES] = {};   // real part of the samples
 float fi[NUM_SAMPLES] = {};   // imaginary part of the samples
 float Sinewave[NUM_SAMPLES];
 
-void fft(float fr[]) {
+void __cast2Float(unsigned int data[]) {
+    for (int i=0; i<NUM_SAMPLES; i++) {
+        fr[i] = (float) data[i];
+    }
+}
+
+void fft(unsigned int data[]) {
     unsigned short m;         // index to be swapped
     unsigned short mr;        // the other index being swapped (reverse)
     float tr, ti;                 // temp storage
@@ -33,11 +39,14 @@ void fft(float fr[]) {
     float wr, wi;     // trig value from lookup table
     float qr, qi;     // temp variable for DL part of alg
 
-    /* BIT REVERSAL */
+    
+                       /*   CAST 2 FLOAT   */
+    __cast2Float(data);
+
+                       /*   BIT REVERSAL   */
     // code below based on stanford graphics lab
     // https://graphics.stanford.edu/~seander/bithacks.html#BitReverseObvious
     for (m=1; m<NUM_SAMPLES_M_1; m++) {
-       // printf("Initial Index: %hu\n", m);
 
         // swap odd and even bits
         mr =  ((m >> 1) & 0x5555) | ((m & 0x5555) << 1);
@@ -60,7 +69,8 @@ void fft(float fr[]) {
         fi[mr] = ti;
     }
 
-    // DANIELSON_LASCZOS 
+                       /*   DANIELSON_LASCZOS   */
+
     // Length of FFTs being combined (starts at 1)
     L = 1;
     // LOG2 of the number of samples, minus 1
