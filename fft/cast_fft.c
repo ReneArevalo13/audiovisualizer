@@ -16,9 +16,12 @@
 #define LOG2_NUM_SAMPLES 3     // log2 of samples gathered
 #define SHIFT_AMOUNT 13        // length of short minus log2 of samples
 
-float fr[NUM_SAMPLES] = {1, 5, 3, 4, 4, 6, 42, 8};   // real part of the samples
+int data[NUM_SAMPLES] = {1, 5, 3, 4, 4, 6, 42, 8};   // real part of the samples
 float fi[NUM_SAMPLES] = {0.0};   // imaginary part of the samples
+float fr[NUM_SAMPLES] = {0.0};   // casted float data 
 float Sinewave[NUM_SAMPLES];
+
+
 
 void FFT_float(float fr[]) {
     unsigned short m;         // index to be swapped
@@ -52,14 +55,17 @@ void FFT_float(float fr[]) {
         // don't swap that which has already been swapped
         if (mr <= m) continue;
         // swap the bit-reversed indices
-        tr = fr[m];
-        fr[m] = fr[mr];
+      //  printf("OG Data at m: %d\n", data[m]);
+        //printf("OG Data at mr: %d\n", data[mr]);
+        tr =  fr[m];    
+        fr[m] = fr[mr]; 
         fr[mr] = tr;
         ti = fi[m];
         fi[m] = fi[mr];
         fi[mr] = ti;
+       // printf("index m: %f\n", fr[m]);
+        // printf("index mr: %f\n", fr[mr]);
     }
-
     // DANIELSON_LASCZOS 
     // Length of FFTs being combined (starts at 1)
     L = 1;
@@ -68,16 +74,12 @@ void FFT_float(float fr[]) {
     // while the length of FFTs being combined is less thant the number of samples
         while (L < NUM_SAMPLES) {
         // determine the length of the FFT which will result from combining two FFTs
-        printf("L: %d\n", L);
         
         istep = L<<1;             // note that this left bit shift is doubling
-        printf("ISTEP %d\n", istep);
         // for each element in the FFT that are being combined...
         for (m=0; m<L; ++m) {
             // Lookup the trig values for that element
             j = m << k;            // index of the sine table
-            printf("J: %d\n", j);
-            printf("M: %d\n", m);
             wr = Sinewave[j + NUM_SAMPLES/4];     // cos(2pi m/N) 
             wi = -Sinewave[j];     // cos(2pi m/N) 
             // i gets the index of one of the FFT elements being combined
@@ -85,11 +87,9 @@ void FFT_float(float fr[]) {
                 // j gets the index of the FFT element being combined with i
                 j = i + L;
                 // compute the trig terms
-                printf("jth element fr[j] = %f\n", fr[j]);
                 tr = (wr * fr[j]) - (wi * fi[j]);   
                 ti = (wr * fi[j]) + (wi * fr[j]);   
                 // divide the ith index elements by 2
-                printf("ith element fr[i] = %f\n", fr[i]);
                 qr = fr[i];
                 qi = fi[i];
                 // compute the new values at each index
@@ -101,21 +101,25 @@ void FFT_float(float fr[]) {
         }
         --k;
         L = istep;
-        printf("NEXT TRANSFORM \n\n");
     }
-    
 }
 
 
 int main() {
+    
     for (int i=0; i<NUM_SAMPLES; i++) {
-        Sinewave[i] = sin((2*PI) * ((float)i / NUM_SAMPLES)) ;
-       // printf("SINwave[%d]: %f\n", i, Sinewave[i]);
+        fr[i] = (float) data[i];
+        Sinewave[i] = sin((2*PI) * ((float)i / NUM_SAMPLES));
+      //  printf("casted data %f\n", fr[i]);
     }
+    
+
     FFT_float(fr);
+    
     int size = sizeof(fr)/sizeof(fr[0]);
     for (int i=0; i<size; i++) {
-       printf(" %f\n", fr[i]);
+        printf(" %f\n", fr[i]);
     }
+    
     return 0;
 }

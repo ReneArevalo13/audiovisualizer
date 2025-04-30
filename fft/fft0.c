@@ -8,8 +8,9 @@
 #define LOG2_NUM_SAMPLES   3 // log2 of the number of gathered samples
 #define SHIFT_AMOUNT     13  // length of short (16bits) minus log2 of number of samples
 
-float fr[NUM_SAMPLES] = {9.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};     // array of the real part of the sample
-float fi[NUM_SAMPLES];     // array of the imaginary part of the sample
+int fr[NUM_SAMPLES] = {9, 1, 2, 3, 4, 5, 6, 7};     
+float new[NUM_SAMPLES] = {};     
+float fi[NUM_SAMPLES] = {};     // array of the imaginary part of the sample
 
 
 void bitReversalPermutation() {
@@ -39,10 +40,9 @@ void bitReversalPermutation() {
         fr[m] = fr[mr];
         fr[mr] = tr;
 
-       // ti = fi[m];
-       // fi[m] = fi[mr];
-       // fr[mr] = ti;
-       // printf("SWAPPED Index: %hu\n", mr);
+        ti = fi[m];
+        fi[m] = fi[mr];
+        fi[mr] = ti;
 
    }
 }
