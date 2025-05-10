@@ -15,10 +15,10 @@
 #include "raylib.h"
 
 //#define PI 3.14159265358979323846
-#define NUM_SAMPLES 16          // number of gathered samples
-#define NUM_SAMPLES_M_1 15      // number of samples -1
-#define LOG2_NUM_SAMPLES 4     // log2 of samples gathered
-#define SHIFT_AMOUNT 12     // length of short minus log2 of samples
+#define NUM_SAMPLES 64          // number of gathered samples
+#define NUM_SAMPLES_M_1 63      // number of samples -1
+#define LOG2_NUM_SAMPLES 6     // log2 of samples gathered
+#define SHIFT_AMOUNT 10     // length of short minus log2 of samples
 
 float fr[NUM_SAMPLES] = {};   // real part of the samples
 float fi[NUM_SAMPLES] = {};   // imaginary part of the samples
@@ -107,7 +107,8 @@ void FFT_float(float fr[]) {
 void magnitude(float fr[], float fi[], float mag[]) {
     // calculate magnitude of signal (Euclidean Norm)
     for (int i=0; i<NUM_SAMPLES; i++) {
-        mag[i] = sqrt(fr[i]*fr[i] + fi[i]*fi[i]);
+        mag[i] = ((sqrt(fr[i]*fr[i] + fi[i]*fi[i])) / NUM_SAMPLES) * 2;
+        printf("MAG[%d]: %f\n", i, mag[i]);
     }
 }
 
@@ -116,19 +117,13 @@ int main() {
         float t = (float) i/NUM_SAMPLES;
       //  printf("t = %f\n", t);
         Sinewave[i] = sinf(((2*PI)* ((float)i/NUM_SAMPLES))) ;
-        fr[i] = sinf((2*PI)* t * 3) + sinf((2*PI)* t * 1);
+        fr[i] = sinf((2*PI)* t * 1);
        // printf("data[%d]: %f\n", i, fr[i]);
     }
 
 
-    printf("PRIOR TO FFT\n");
-    for (int i=0; i<NUM_SAMPLES; i++) {
-       printf("%f\n", fr[i]);
-    }
-
     printf("FFT\n");
     FFT_float(fr);
-
     magnitude(fr, fi, mag);
     // Raylib plotting
     const int screenWidth = 800;
@@ -144,7 +139,7 @@ int main() {
 
             ClearBackground(WHITE);
             for (int i=0; i < N; i++) {
-                float s_height = mag[i]*50;
+                float s_height = mag[i]* 10;
                 DrawRectangle(i*cell_width, sh - s_height, cell_width, s_height, VIOLET);
             }
 
