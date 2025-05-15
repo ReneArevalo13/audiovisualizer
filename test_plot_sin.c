@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "raylib.h"
+#include <time.h>
+
 
 //#define PI 3.14159265358979323846
 #define NUM_SAMPLES 64          // number of gathered samples
@@ -106,41 +108,73 @@ void FFT_float(float fr[]) {
 
 void magnitude(float fr[], float fi[], float mag[]) {
     // calculate magnitude of signal (Euclidean Norm)
-    for (int i=0; i<NUM_SAMPLES; i++) {
+    // with normalization
+    for (int i=1; i<NUM_SAMPLES; i++) {
+    // without normalization
+     //   mag[i] = sqrt(fr[i]*fr[i] + fi[i]*fi[i]);
+    // with normalization
         mag[i] = ((sqrt(fr[i]*fr[i] + fi[i]*fi[i])) / NUM_SAMPLES) * 2;
         printf("MAG[%d]: %f\n", i, mag[i]);
     }
 }
+/* generate varying sine waves */
+void gen_data(float fr[]) {
+    int rand1 = rand() % 10;
+    int rand2 = rand() % 20;
+    int rand3 = rand() % 13;
 
+    for (int i=0; i<NUM_SAMPLES; i++) {
+        float t = (float) i/NUM_SAMPLES;
+        fr[i] = sinf((12*PI)* t + rand1) + sinf(rand1*PI*t + rand2) + sinf(3*PI*t + rand3);
+        printf("data: %f\n", fr[i]);
+    }
+
+}
+void clear_data(float fr[], float fi[], float mag[]) {
+    for (int i=0; i<NUM_SAMPLES; i++) {
+        fr[i] = 0;  
+        fi[i] = 0;  
+        mag[i] = 0;  
+    }
+}
 int main() {
+    srand(time(NULL));
     for (int i=0; i<NUM_SAMPLES; i++) {
         float t = (float) i/NUM_SAMPLES;
       //  printf("t = %f\n", t);
         Sinewave[i] = sinf(((2*PI)* ((float)i/NUM_SAMPLES))) ;
-        fr[i] = sinf((2*PI)* t * 1);
+       // fr[i] = sinf((2*PI)* t + 3) + sinf(PI*t + 2) + sinf(3*PI*t + 1);
        // printf("data[%d]: %f\n", i, fr[i]);
     }
 
+    
 
-    printf("FFT\n");
-    FFT_float(fr);
-    magnitude(fr, fi, mag);
     // Raylib plotting
     const int screenWidth = 800;
     const int screenHeight = 800;
     const int sh = screenHeight;
     const int N = NUM_SAMPLES;
-    const int hh = screenHeight/2;
     InitWindow(screenWidth, screenHeight, "Frequency Domain data");
+
     SetTargetFPS(60);
     float cell_width = (float)screenWidth/N;
+
     while(!WindowShouldClose()){
+        clear_data(fr,fi,mag);
+        gen_data(fr);
+        // FFT transform
+        FFT_float(fr);
+        magnitude(fr, fi, mag);
         BeginDrawing();
 
             ClearBackground(WHITE);
             for (int i=0; i < N; i++) {
-                float s_height = mag[i]* 10;
+                if (isnan(mag[i])) {
+                    break;
+                }
+                float s_height = mag[i]*100;
                 DrawRectangle(i*cell_width, sh - s_height, cell_width, s_height, VIOLET);
+
             }
 
         EndDrawing();

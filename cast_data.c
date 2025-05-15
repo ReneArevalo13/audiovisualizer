@@ -1,15 +1,29 @@
 /* 
-   Retrieve the raw data from the song file.
-*/
+    Process PCM Frames and get them to plot via raylib
 
+
+    WILL BE LIMITING OUR SCOPE TO MP3 FOR NOW
+
+*/
+// WILL TRY TO DIRECTLY CAST DATA TO FLOAT IN data_callback function
 #include "miniaudio.c"
+#include "raylib.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
-int callbacks = 0;
-void* pData;
-float data[4000] = {};
+#define ARRAY_LEN(xs) sizeof(xs)/sizeof(xs[0])
+
+
+/*
+   MP3 Data represented as float32 in miniaudio
+*/
+
+const int ARRAY_SIZE = 442;
+ma_uint32 global_frames[ARRAY_SIZE] = {0};
+size_t count = 0;
 
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
 
@@ -22,22 +36,13 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
     ma_uint32 bytesPerSample = ma_get_bytes_per_sample(format); 
     ma_uint64 channels       = pDecoder->outputChannels;
 
-    printf("\nFRAMECOUNT %d\n", frameCount);
+    // read data
     ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, &framesRead);
 
-    memcpy(pData, pOutput, sizeof(format)*frameCount);
 
-    // data type should be taken into account
-    if (format == 5) {
-        float frame = *(float*)pData;
-        data[callbacks] = frame;
-        printf("%f\t ", data[callbacks]);
-    } else if (format == 3) {
-        int32_t frame = *(int32_t*)pData;
-        printf("%d\n", frame);
-    }
-    //printf("FRAMES: %llu\n", framesRead);
-    callbacks++;
+    // copying data
+    memcpy(global_frames, pOutput, sizeof(format)*frameCount);
+    count += (size_t)frameCount;
 }
 
 
@@ -55,6 +60,8 @@ int main (int argc, char** argv) {
     ma_uint32 bytesPerSample;
     ma_format format;
 
+    
+    
     if (argc < 2) {
         printf("No input file");
         return -1;
@@ -72,12 +79,6 @@ int main (int argc, char** argv) {
     channels       = decoder.outputChannels;
     bytesPerSample = ma_get_bytes_per_sample(format); 
 
-    printf("Format: %d\n", format);
-    printf("TotalFrames: %llu\n", totalFrames);
-    printf("SampleRate: %llu\n", sampleRate);
-    printf("Channels: %llu\n", channels);
-    printf("BytesPerSample: %u\n", bytesPerSample);
-    
     deviceConfig = ma_device_config_init(ma_device_type_playback);
     deviceConfig.playback.format     = format;
     deviceConfig.playback.channels   = channels;
@@ -85,15 +86,8 @@ int main (int argc, char** argv) {
     deviceConfig.dataCallback        = data_callback;
     deviceConfig.pUserData           = &decoder;
 
-    pData = malloc(totalFrames * channels * bytesPerSample);
-    printf("Memory allocated: %llu\n", (totalFrames*channels*bytesPerSample));
-    if (pData == NULL) {
-        printf("malloc failed\n");
-        ma_decoder_uninit(&decoder);    
-        return -3;
-    }
 
-    if(ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
+    if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
         printf("Failed to open playback device.\n");
         ma_decoder_uninit(&decoder);
         return -4;
@@ -103,9 +97,37 @@ int main (int argc, char** argv) {
         ma_decoder_uninit(&decoder);
         return -5;
     }
-    printf("Press Enter to quit...\n");
-    getchar();
-    printf("\ncallbacks %d\n", callbacks);
+
+////////////////////////////////////////////////////////////////////////////////////////
+    // RAYLIB STUFF
+    const int screenWidth = 800;
+    const int screenHeight = 800;
+    const int N = 441;
+    const int hh = screenHeight/2;  // half height
+
+    // Plot the data
+    InitWindow(screenWidth, screenHeight, "PCM DATA");
+    SetTargetFPS(60);
+
+    while(!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        float cell_width = (float)screenWidth/N;
+        for (int i=0; i<N; i++) {
+
+            float sample = *(float*)&global_frames[i];
+            if (sample >= 0) {
+                float s_height = hh*sample;  // scaled height
+                DrawRectangle(i*cell_width, hh-s_height, cell_width, s_height, VIOLET);
+            } else {
+                float s_height = -1.0*hh*sample;  // scaled height
+                DrawRectangle(i*cell_width, hh, cell_width, s_height, SKYBLUE);
+            }
+       }
+        EndDrawing();
+    }
+    CloseWindow();
+
     ma_decoder_uninit(&decoder);
     ma_device_uninit(&device);
     return 0;

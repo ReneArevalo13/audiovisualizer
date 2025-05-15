@@ -19,7 +19,8 @@
    MP3 Data represented as float32 in miniaudio
 */
 
-const int ARRAY_SIZE = 442;
+// const int ARRAY_SIZE = 442;
+const int ARRAY_SIZE = 512;
 ma_uint32 global_frames[ARRAY_SIZE] = {0};
 size_t count = 0;
 
@@ -95,6 +96,8 @@ int main (int argc, char** argv) {
         ma_decoder_uninit(&decoder);
         return -5;
     }
+
+////////////////////////////////////////////////////////////////////////////////////////
     // RAYLIB STUFF
     const int screenWidth = 800;
     const int screenHeight = 800;
@@ -108,19 +111,15 @@ int main (int argc, char** argv) {
     while(!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-        float cell_width = (float)screenWidth/N;
-        for (int i=0; i<441; i++) {
+        float cell_width = (float)screenWidth/ARRAY_SIZE;
+        for (int i=0; i<ARRAY_SIZE; i++) {
 
             float sample = *(float*)&global_frames[i];
-            printf("outside:%d\t, sample: %f\n", i, sample);
             if (sample >= 0) {
-               float s_height = hh*sample;  // scaled height
-            //    printf("int i %d\n",i);
-              //  printf("float i %f\n",(float)i);
-               // printf("POSITION X: %f\n", i*cell_width);
+                float s_height = hh*sample;  // scaled height
                 DrawRectangle(i*cell_width, hh-s_height, cell_width, s_height, VIOLET);
             } else {
-                 float s_height = -1.0*hh*sample;  // scaled height
+                float s_height = -1.0*hh*sample;  // scaled height
                 DrawRectangle(i*cell_width, hh, cell_width, s_height, SKYBLUE);
             }
        }
@@ -128,11 +127,8 @@ int main (int argc, char** argv) {
     }
     CloseWindow();
 
-   // getchar();
-    printf("frame count %zu", count);
     ma_decoder_uninit(&decoder);
     ma_device_uninit(&device);
-    printf("FILE END\n");
     return 0;
 
 }

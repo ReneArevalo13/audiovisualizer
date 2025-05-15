@@ -7,7 +7,7 @@ int main() {
 
     const int screenWidth = 800;
     const int screenHeight = 500;
-    const int N = 150;
+    const int N = 200;
     const int hh = screenHeight/2; // half height
 
     InitWindow(screenWidth, screenHeight, "random rectangles");
@@ -27,7 +27,7 @@ int main() {
            // printf("%f", height);
             float s_height = (screenHeight/2)*height; // scaled height
            // printf("%f", s_height);
-            DrawRectangle(i*cell_width,  hh - s_height , 5, s_height, BLACK);
+            DrawRectangle(i*cell_width,  hh - s_height , cell_width, s_height, BLACK);
         }
         EndDrawing();
     }

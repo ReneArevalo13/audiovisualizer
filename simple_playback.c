@@ -16,7 +16,7 @@ void data_callback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uin
     }
 
     ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, &framesRead);
-    printf("%d\t", &pOutput);
+   // printf("%d\t", &pOutput);
        // printf("Framecount: %u/n", frameCount);
    // (void)pInput;
 }
@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
         return -4;
     }
 
+    printf("SAMPLE RATE: %u\n", deviceConfig.sampleRate);
     printf("LETS PARTY\n");
     printf("Press Enter to quit ...");
     getchar();

@@ -23,6 +23,7 @@
 const int ARRAY_SIZE = 512;
 ma_uint32 global_frames[ARRAY_SIZE] = {0};
 float fft_data[ARRAY_SIZE] = {0};
+float mag[ARRAY_SIZE] = {0};
 size_t count = 0;
 
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
@@ -103,35 +104,37 @@ int main (int argc, char** argv) {
 
     const int screenWidth = 800;
     const int screenHeight = 800;
-    const int N = 441;
-    const int hh = screenHeight/2;  // half height
+    const int N = 221;    // corresponds to 22.1 KHz being upper limit
+    const int sh = screenHeight;  
 
     // Plot the data
-    InitWindow(screenWidth, screenHeight, "PCM DATA");
+    InitWindow(screenWidth, screenHeight, "FOURIER MAGNITUDES");
     SetTargetFPS(60);
 
+    
     while(!WindowShouldClose()) {
-        for (int i=0; i<ARRAY_SIZE; i++) {
-            fft_data[i] = *(float*)&global_frames[i];   
-        }
-      
-                        //          ***   FFT PROCESSING   ***          // 
-        fft(fft_data);
 
+                    //          ***   Cast PCM data to floats   ***          // 
+    for (int i=0; i<ARRAY_SIZE; i++) {
+            float s =  *(float*)&global_frames[i];   
+        //    printf("data: %f\t", s);
+            fft_data[i] = s;       
+        }
+    
+                        //          ***   FFT PROCESSING   ***          // 
+        fft(fft_data, mag);
                         //          ***   DRAWING ON SCREEN   ***          // 
         BeginDrawing();
-        ClearBackground(BLACK);
-        float cell_width = (float)screenWidth/N;
-        for (int i=0; i<N; i++) {
+            ClearBackground(BLACK);
+            float cell_width = (float)screenWidth/N;
+            for (int i=0; i<N; i++) {
 
-            float sample = fft_data[i];
-            if (sample >= 0) {
-                float s_height = hh*sample;  // scaled height
-                DrawRectangle(i*cell_width, hh-s_height, cell_width, s_height, VIOLET);
-            } else {
-                float s_height = -1.0*hh*sample;  // scaled height
-                DrawRectangle(i*cell_width, hh, cell_width, s_height, SKYBLUE);
-            }
+                float sample = fft_data[i];
+                
+                printf("mag: %f\n", mag[i]);
+                float s_height = sample *200;  // scaled height
+                DrawRectangle(i*cell_width, sh-s_height, cell_width, s_height, VIOLET);
+             
        }
         EndDrawing();
     }
@@ -142,3 +145,5 @@ int main (int argc, char** argv) {
     return 0;
 
 }
+
+// NOTE: Only need the magnitudes up to the 221st data point
