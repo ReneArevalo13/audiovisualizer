@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "fft/fft.h"
+#include <string.h>
 
 #define ARRAY_LEN(xs) sizeof(xs)/sizeof(xs[0])
 
@@ -45,7 +46,6 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
     memcpy(global_frames, pOutput, sizeof(format)*frameCount);
     count += (size_t)frameCount;
 }
-
 
 
 int main (int argc, char** argv) {
@@ -117,7 +117,7 @@ int main (int argc, char** argv) {
                     //          ***   Cast PCM data to floats   ***          // 
     for (int i=0; i<ARRAY_SIZE; i++) {
             float s =  *(float*)&global_frames[i];   
-        //    printf("data: %f\t", s);
+            printf("raw data: %f\n", s);
             fft_data[i] = s;       
         }
     
@@ -131,8 +131,8 @@ int main (int argc, char** argv) {
 
                 float sample = fft_data[i];
                 
-                printf("mag: %f\n", mag[i]);
-                float s_height = sample *200;  // scaled height
+               // printf("mag: %f\n", mag[i]);
+                float s_height = sample *100;  // scaled height
                 DrawRectangle(i*cell_width, sh-s_height, cell_width, s_height, VIOLET);
              
        }

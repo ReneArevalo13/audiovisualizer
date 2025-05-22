@@ -136,18 +136,11 @@ void gen_data(float fr[]) {
 
 }
 void clear_data(float fr[], float fi[], float mag[]) {
-
     for (int i=0; i<NUM_SAMPLES; i++) {
         fr[i] = 0;  
         fi[i] = 0;  
         mag[i] = 0;  
     }
-
-/*
-    memset(fr, 0, NUM_SAMPLES*sizeof(fr[0]));
-    memset(fi, 0, NUM_SAMPLES*sizeof(fi[0]));
-    memset(mag, 0, NUM_SAMPLES*sizeof(mag[0]));
-*/
 }
 int main() {
     srand(time(NULL));
@@ -165,8 +158,9 @@ int main() {
     const int screenWidth = 800;
     const int screenHeight = 800;
     const int sh = screenHeight;
-//    const int N = NUM_SAMPLES;
-    const int N = NYQUIST;
+    const int hh = screenHeight/2;
+    const int N = NUM_SAMPLES;
+  //  const int N = NYQUIST;
     InitWindow(screenWidth, screenHeight, "Frequency Domain data");
 
     SetTargetFPS(60);
@@ -182,11 +176,15 @@ int main() {
 
             ClearBackground(WHITE);
             for (int i=0; i < N; i++) {
-                if (isnan(mag[i])) {
-                    break;
+                
+                float s = fr[i]*1;
+                if (s >= 0) {
+                    float s_height = hh*s;
+                DrawRectangle(i*cell_width, hh - s_height, cell_width, s_height, VIOLET);
+                } else {
+                    float s_height = -1.0*hh*s;
+                DrawRectangle(i*cell_width, hh, cell_width, s_height, VIOLET);
                 }
-                float s_height = fr[i]*1;
-                DrawRectangle(i*cell_width, sh - s_height, cell_width, s_height, VIOLET);
 
             }
 
