@@ -208,7 +208,7 @@ int main (int argc, char** argv) {
 
                             //          *** RayLib Setup ***          // 
 
-    const int screenWidth = 800;
+    const int screenWidth = 1000;
     const int screenHeight = 800;
     const int N = 221;    // corresponds to 22.1 KHz being upper limit
     const int sh = screenHeight;  
@@ -239,7 +239,7 @@ int main (int argc, char** argv) {
             for (int i=0; i<N; i++) {
                 float sample = mag[i];
                // printf("mag: %f\n", mag[i]);
-                float s_height = sample *1000;  // scaled height
+                float s_height = sample *5500;  // scaled height
                 DrawRectangle(i*cell_width, sh-s_height, cell_width, s_height, VIOLET);
              
        }
