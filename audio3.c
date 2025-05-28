@@ -33,7 +33,7 @@ ma_uint32 global_frames[NUM_SAMPLES] = {0};
 float fr[NUM_SAMPLES] = {};   // real part of the samples
 float fi[NUM_SAMPLES] = {};   // imaginary part of the samples
 float mag[NUM_SAMPLES] = {};   // magnitude of fft data 
-float Sinewave[NUM_SAMPLES];
+//float Sinewave[NUM_SAMPLES];
 
 
 size_t count = 0;
