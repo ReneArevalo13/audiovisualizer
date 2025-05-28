@@ -4,6 +4,9 @@
     WILL BE LIMITING OUR SCOPE TO MP3 FOR NOW
 */
 
+
+// NOTE THIS VERSION IS WORKING AS INTENDED: WILL REFINE 
+
 #include "miniaudio.c"
 #include "raylib.h"
 #include <stdio.h>
@@ -30,6 +33,7 @@ ma_uint32 global_frames[NUM_SAMPLES] = {0};
 float fr[NUM_SAMPLES] = {};   // real part of the samples
 float fi[NUM_SAMPLES] = {};   // imaginary part of the samples
 float mag[NUM_SAMPLES] = {};   // magnitude of fft data 
+float hann[NUM_SAMPLES] = {};   // hann windowing 
 float Sinewave[NUM_SAMPLES];
 
 
@@ -62,8 +66,8 @@ void magnitude(float fr[], float fi[], float mag[]) {
         }
         mag[i] = sqrt(fr[i]*fr[i] + fi[i]*fi[i])/NUM_SAMPLES * 2;
 
-        printf("fr[%d]:%f fi[%d]: %f\n", i, fr[i], i, fi[i]);
-        printf("MAG[%d]: %f\n", i, mag[i]);
+       // printf("fr[%d]:%f fi[%d]: %f\n", i, fr[i], i, fi[i]);
+        //printf("MAG[%d]: %f\n", i, mag[i]);
     }
 }
 
@@ -225,7 +229,8 @@ int main (int argc, char** argv) {
     for (int i=0; i<NUM_SAMPLES; i++) {
             float s =  *(float*)&global_frames[i]; 
             Sinewave[i] = sinf(((2*PI)* ((float)i/NUM_SAMPLES))) ;
-            fr[i] = s;       
+            hann[i] = 0.5*(1 - cosf(2*PI*i/NUM_SAMPLES-1));
+            fr[i] = hann[i]*s;       
           //  printf("raw data: %f\n", fr[i]);
         }
     
